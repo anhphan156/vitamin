@@ -38,11 +38,11 @@ int main(){
     /* } */
     /* std::cout << glGetString(GL_VERSION) << std::endl; */
 
-    float positions[20] = {
-        -.5f, -.5f, 1.0f, 0.0f, 0.0f,
-        .5f, .5f, 0.0f, 0.0f, 1.0f,
-        -0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
-        0.5f, -0.5f, 0.0f, 0.0f, 0.0f
+    float positions[] = {
+        -.5f, -.5f, 1.0f, 0.0f, 0.0f, 0.0, 0.0,
+        .5f, .5f, 0.0f, 0.0f, 1.0f, 1.0, 1.0,
+        -0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0, 1.0,
+        0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0, 0.0
     };
 
     unsigned int indices[6] = {
@@ -53,7 +53,7 @@ int main(){
     unsigned int buffer;
     glGenBuffers(1, &buffer);
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, 20 * sizeof(float), positions, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, 28 * sizeof(float), positions, GL_STATIC_DRAW);
 
     unsigned int ibo;
     glGenBuffers(1, &ibo);
@@ -61,10 +61,13 @@ int main(){
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (const void*)0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (const void*)0);
 
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (const void*)(2 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (const void*)(2 * sizeof(float)));
+
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (const void*)(5 * sizeof(float)));
 
     char vert[61] = "/home/backspace/data/dev/miso/resources/shaders/color.vert";
     char frag[61] = "/home/backspace/data/dev/miso/resources/shaders/color.frag";
