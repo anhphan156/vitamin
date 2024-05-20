@@ -3,7 +3,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
+#include "math/math.h"
 #include "shader.h"
 
 void error_callback(int error, const char* description);
@@ -36,34 +38,61 @@ int main(){
     /* } */
     /* std::cout << glGetString(GL_VERSION) << std::endl; */
 
-    float positions[6] = {
-        -.5f, -.5f,
-        0.0f, 0.2f,
-        .5f, -.5f
+    float positions[20] = {
+        -.5f, -.5f, 1.0f, 0.0f, 0.0f,
+        .5f, .5f, 0.0f, 0.0f, 1.0f,
+        -0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
+        0.5f, -0.5f, 0.0f, 0.0f, 0.0f
+    };
+
+    unsigned int indices[6] = {
+        0, 1, 2,
+        0, 3, 1
     };
 
     unsigned int buffer;
     glGenBuffers(1, &buffer);
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(float), positions, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, 20 * sizeof(float), positions, GL_STATIC_DRAW);
+
+    unsigned int ibo;
+    glGenBuffers(1, &ibo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (const void*)0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (const void*)0);
 
-    int shader_program = create_shader_program();
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (const void*)(2 * sizeof(float)));
+
+    char vert[61] = "/home/backspace/data/dev/miso/resources/shaders/color.vert";
+    char frag[61] = "/home/backspace/data/dev/miso/resources/shaders/color.frag";
+    int shader_program = create_shader_program(vert, frag);
     glUseProgram(shader_program);
 
     while (!glfwWindowShouldClose(window))
     {
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        int loc = glGetUniformLocation(shader_program, "u_r");
+        if(loc != -1){
+            double t = glfwGetTime();
+            float s = sin(t);
+            float c = cos(t);
+            float n[4] = { c, s, -s, c };
+            glUniformMatrix2fv(loc, 1, GL_FALSE, n);
+        }
+
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
     glDeleteBuffers(1, &buffer);
+    glDeleteBuffers(1, &ibo);
+    glDeleteProgram(shader_program);
     glfwTerminate();
 
     return 0;

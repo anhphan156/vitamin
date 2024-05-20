@@ -47,11 +47,8 @@ unsigned int compile_shader(unsigned int type, const char* const source){
     return id;
 }
 
-unsigned int create_shader_program(){
+unsigned int create_shader_program(char* vert, char* frag){
     unsigned int program = glCreateProgram();
-
-    char vert[61] = "/home/backspace/data/dev/miso/resources/shaders/color.vert";
-    char frag[61] = "/home/backspace/data/dev/miso/resources/shaders/color.frag";
 
     char* vert_source = load_shader_source(vert);
     char* frag_source = load_shader_source(frag);
