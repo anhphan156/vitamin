@@ -12,7 +12,9 @@
     in{
         devShells."${system}".default = pkgs.mkShell {
             packages = with pkgs; [
-                glfw
+                wayland
+                libxkbcommon
+                glfw-wayland
                 glew
             ];
 
