@@ -74,6 +74,8 @@ int main(){
     int shader_program = create_shader_program(vert, frag);
     glUseProgram(shader_program);
 
+    float rotation[4];
+
     while (!glfwWindowShouldClose(window))
     {
         glClear(GL_COLOR_BUFFER_BIT);
@@ -81,10 +83,8 @@ int main(){
         int loc = glGetUniformLocation(shader_program, "u_r");
         if(loc != -1){
             double t = glfwGetTime();
-            float s = sin(t);
-            float c = cos(t);
-            float n[4] = { c, s, -s, c };
-            glUniformMatrix2fv(loc, 1, GL_FALSE, n);
+            mkRotation2x2(t, rotation);
+            glUniformMatrix2fv(loc, 1, GL_FALSE, rotation);
         }
 
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
