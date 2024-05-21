@@ -1,10 +1,6 @@
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-
-#include <stdio.h>
-#include <stdlib.h>
 #include <math.h>
 
+#include "stdinc.h"
 #include "math/math.h"
 #include "shader.h"
 
@@ -87,7 +83,7 @@ int main(){
             glUniformMatrix2fv(loc, 1, GL_FALSE, rotation);
         }
 
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
+        GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL));
 
         glfwSwapBuffers(window);
         glfwPollEvents();
