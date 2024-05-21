@@ -1,22 +1,33 @@
-app: main.o shader.o
-	gcc build/main.o build/shader.o -o build/app -ldl -lGLEW -lglfw -lGL -lEGL -lwayland-client -lwayland-cursor -lwayland-egl -lxkbcommon -lm -lpthread
+CC := gcc
+LDFLAGS := -ldl -lGLEW -lglfw -lGL -lEGL -lwayland-client -lwayland-cursor -lwayland-egl -lxkbcommon -lm -lpthread
+CFLAGS := -Wall -g
 
-main.o:
-	gcc -c src/main.c -o build/main.o -g
+SRC_DIR := src
+BUILD_DIR := build
 
-shader.o:
-	gcc -c src/shader.c  -o build/shader.o -g
+SRCS := $(shell find $(SRC_DIR) -name '*.c')
+OBJS := $(SRCS:%.c=%.o)
+EXECUTABLE = $(BUILD_DIR)/miso
+
+.PHONY: all clean
+
+all: $(EXECUTABLE)
+
+$(EXECUTABLE): $(OBJS)
+	$(CC) $(LDFLAGS) $(addprefix $(BUILD_DIR)/,$(notdir $^)) -o $@
+
+$(OBJS): %.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $(BUILD_DIR)/$(notdir $@)
 
 run:
-	./build/app
+	./build/miso
 
 debug:
-	gdb ./build/app
+	gdb ./build/miso
 
-leak-check:
+eak-check:
 	#valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --log-file=leak.txt ./build/app
-	valgrind --leak-check=yes --log-file=leak.txt ./build/app
+	valgrind --leak-check=yes --log-file=leak.txt ./build/miso
 
 clean:
-	rm build/*
-	touch build/tmp
+	rm -rf $(BUILD_DIR)/*

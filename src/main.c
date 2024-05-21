@@ -1,8 +1,8 @@
 #include <math.h>
 
-#include "stdinc.h"
+#include "renderer/stdinc.h"
 #include "math/math.h"
-#include "shader.h"
+#include "renderer/shader.h"
 
 void error_callback(int error, const char* description);
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -28,7 +28,7 @@ int main(){
     glfwMakeContextCurrent(window);
     glfwSetKeyCallback(window, key_callback);
 
-    GLenum err = glewInit();
+    glewInit();
     /* if(err != GLEW_OK){ */
     /*     std::cout << err  << std::endl; */
     /* } */
@@ -47,40 +47,40 @@ int main(){
     };
 
     unsigned int buffer;
-    glGenBuffers(1, &buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, 28 * sizeof(float), positions, GL_STATIC_DRAW);
+    GLCall(glGenBuffers(1, &buffer));
+    GLCall(glBindBuffer(GL_ARRAY_BUFFER, buffer));
+    GLCall(glBufferData(GL_ARRAY_BUFFER, 28 * sizeof(float), positions, GL_STATIC_DRAW));
 
     unsigned int ibo;
-    glGenBuffers(1, &ibo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW);
+    GLCall(glGenBuffers(1, &ibo));
+    GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
+    GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW));
 
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (const void*)0);
+    GLCall(glEnableVertexAttribArray(0));
+    GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (const void*)0));
 
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (const void*)(2 * sizeof(float)));
+    GLCall(glEnableVertexAttribArray(1));
+    GLCall(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (const void*)(2 * sizeof(float))));
 
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (const void*)(5 * sizeof(float)));
+    GLCall(glEnableVertexAttribArray(2));
+    GLCall(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (const void*)(5 * sizeof(float))));
 
     char vert[61] = "/home/backspace/data/dev/miso/resources/shaders/color.vert";
     char frag[61] = "/home/backspace/data/dev/miso/resources/shaders/color.frag";
     int shader_program = create_shader_program(vert, frag);
-    glUseProgram(shader_program);
+    GLCall(glUseProgram(shader_program));
 
     float rotation[4];
 
     while (!glfwWindowShouldClose(window))
     {
-        glClear(GL_COLOR_BUFFER_BIT);
+        GLCall(glClear(GL_COLOR_BUFFER_BIT));
 
-        int loc = glGetUniformLocation(shader_program, "u_r");
+        GLCall(int loc = glGetUniformLocation(shader_program, "u_r"));
         if(loc != -1){
             double t = glfwGetTime();
             mkRotation2x2(t, rotation);
-            glUniformMatrix2fv(loc, 1, GL_FALSE, rotation);
+            GLCall(glUniformMatrix2fv(loc, 1, GL_FALSE, rotation));
         }
 
         GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL));
@@ -89,10 +89,10 @@ int main(){
         glfwPollEvents();
     }
 
-    glDeleteBuffers(1, &buffer);
-    glDeleteBuffers(1, &ibo);
-    glDeleteProgram(shader_program);
-    glfwTerminate();
+    GLCall(GLCall(glDeleteBuffers(1, &buffer)));
+    GLCall(glDeleteBuffers(1, &ibo));
+    GLCall(glDeleteProgram(shader_program));
+    GLCall(glfwTerminate());
 
     return 0;
 }
