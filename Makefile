@@ -17,7 +17,7 @@ $(EXECUTABLE): $(OBJS)
 	$(CC) $(LDFLAGS) $(addprefix $(BUILD_DIR)/,$(notdir $^)) -o $@
 
 $(OBJS): %.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $(BUILD_DIR)/$(notdir $@)
+	$(CC) $(CFLAGS) -c $< -o $(addprefix $(BUILD_DIR)/,$(notdir $@))
 
 run:
 	./build/miso
@@ -25,7 +25,7 @@ run:
 debug:
 	gdb ./build/miso
 
-eak-check:
+leak-check:
 	#valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --log-file=leak.txt ./build/app
 	valgrind --leak-check=yes --log-file=leak.txt ./build/miso
 
