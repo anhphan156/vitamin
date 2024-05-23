@@ -6,6 +6,9 @@ struct Mesh *CreateMesh(float *positions, unsigned int position_count,
                         unsigned int *indices, unsigned int index_count) {
   struct Mesh *m = (struct Mesh *)malloc(sizeof(struct Mesh));
 
+  GLCall(glGenVertexArrays(1, &m->vao));
+  GLCall(glBindVertexArray(m->vao));
+
   GLCall(glGenBuffers(1, &m->vbo));
   GLCall(glBindBuffer(GL_ARRAY_BUFFER, m->vbo));
   GLCall(glBufferData(GL_ARRAY_BUFFER, position_count * sizeof(float),
@@ -33,6 +36,10 @@ struct Mesh *CreateMesh(float *positions, unsigned int position_count,
   char vert[61] = "/home/backspace/data/dev/miso/resources/shaders/color.vert";
   char frag[61] = "/home/backspace/data/dev/miso/resources/shaders/color.frag";
   m->shader_program = create_shader_program(vert, frag);
+
+  GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
+  GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
+  GLCall(glBindVertexArray(0));
 
   return m;
 }

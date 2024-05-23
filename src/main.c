@@ -19,12 +19,15 @@ int main() {
   unsigned int indices[6] = {0, 1, 2, 0, 3, 1};
 
   struct Mesh *mesh = CreateMesh(positions, 28, indices, 6);
-  GLCall(glUseProgram(mesh->shader_program));
 
   float rotation[4];
 
   while (!glfwWindowShouldClose(window)) {
     GLCall(glClear(GL_COLOR_BUFFER_BIT));
+
+    GLCall(glBindVertexArray(mesh->vao));
+    GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ibo));
+    GLCall(glUseProgram(mesh->shader_program));
 
     GLCall(int loc = glGetUniformLocation(mesh->shader_program, "u_r"));
     if (loc != -1) {
