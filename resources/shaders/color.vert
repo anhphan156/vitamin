@@ -6,12 +6,11 @@ layout(location = 2) in vec2 texCoord;
 
 out vec3 c;
 out vec2 uv;
-uniform mat2 u_r;
+uniform mat4 u_mvp;
 
 void main(){
     c = color;
     uv = texCoord;
 
-    vec2 p = u_r * position.xy;
-    gl_Position = vec4(p, 0.0, 1.0);
+    gl_Position = u_mvp * position;
 }

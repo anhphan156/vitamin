@@ -22,16 +22,16 @@ struct Mesh *CreateMesh(float *positions, unsigned int position_count,
 
   // attributes
   GLCall(glEnableVertexAttribArray(0));
-  GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(float),
+  GLCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
                                (const void *)0));
 
   GLCall(glEnableVertexAttribArray(1));
-  GLCall(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float),
-                               (const void *)(2 * sizeof(float))));
+  GLCall(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
+                               (const void *)(3 * sizeof(float))));
 
   GLCall(glEnableVertexAttribArray(2));
-  GLCall(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(float),
-                               (const void *)(5 * sizeof(float))));
+  GLCall(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
+                               (const void *)(6 * sizeof(float))));
 
   char vert[61] = "/home/backspace/data/dev/miso/resources/shaders/color.vert";
   char frag[61] = "/home/backspace/data/dev/miso/resources/shaders/color.frag";
@@ -49,6 +49,7 @@ void ClearMesh(struct Mesh *m) {
   GLCall(GLCall(glDeleteBuffers(1, &m->vbo)));
   GLCall(glDeleteBuffers(1, &m->ibo));
   GLCall(glDeleteProgram(m->shader_program));
+  GLCall(glDeleteVertexArrays(1, &m->vao));
 
   free(m);
 }

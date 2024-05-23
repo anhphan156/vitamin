@@ -1,30 +1,33 @@
 {
-    description = "an opengl project";
-    inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    outputs = { self, nixpkgs, ... } :
-    let
-        system = "x86_64-linux";
-        pkgs = import nixpkgs { inherit system; };
+  description = "an opengl project";
+  inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+  outputs = {
+    self,
+    nixpkgs,
+    ...
+  }: let
+    system = "x86_64-linux";
+    pkgs = import nixpkgs {inherit system;};
 
-        run = pkgs.writeShellScriptBin "run" ''
-            make clean && make && make run
-        '';
-    in{
-        devShells."${system}".default = pkgs.mkShell {
-            packages = with pkgs; [
-                wayland
-                libxkbcommon
-                glfw-wayland
-                glew
-            ];
+    run = pkgs.writeShellScriptBin "run" ''
+      make clean && make && make run
+    '';
+  in {
+    devShells."${system}".default = pkgs.mkShell {
+      packages = with pkgs; [
+        wayland
+        libxkbcommon
+        glfw-wayland
+        glew
+      ];
 
-            buildInputs = [ 
-                run 
-            ];
+      buildInputs = [
+        run
+      ];
 
-            shellHook = ''
-                exec zsh
-            '';
-        };
+      shellHook = ''
+        exec zsh
+      '';
     };
+  };
 }
