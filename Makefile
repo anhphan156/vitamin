@@ -1,5 +1,5 @@
 CC := gcc
-LDFLAGS := -ldl -lGLEW -lglfw -lGL -lEGL -lwayland-client -lwayland-cursor -lwayland-egl -lxkbcommon -lm -lpthread
+LDFLAGS := -ldl -lGLEW -lglfw -lGL -lEGL -lwayland-client -lwayland-cursor -lwayland-egl -lxkbcommon -lm -lpthread -lassimp
 CFLAGS := -Wall -g
 
 SRC_DIR := src

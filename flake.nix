@@ -19,6 +19,7 @@
         libxkbcommon
         glfw-wayland
         glew
+				assimp
       ];
 
       buildInputs = [

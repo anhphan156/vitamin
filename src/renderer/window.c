@@ -5,6 +5,10 @@
 void error_callback(int error, const char *description);
 static void key_callback(GLFWwindow *window, int key, int scancode, int action,
                          int mods);
+float w = 800.0f;
+float h = 600.0f;
+
+float GetAspectRatio() { return h / w; }
 
 GLFWwindow *GetWindow() {
   static GLFWwindow *window = NULL;
@@ -21,7 +25,7 @@ GLFWwindow *GetWindow() {
     /* glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); */
 
     glfwSetErrorCallback(error_callback);
-    window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);
+    window = glfwCreateWindow(w, h, "LearnOpenGL", NULL, NULL);
     if (window == NULL) {
       printf("Failed to create GLFW window");
       glfwTerminate();
