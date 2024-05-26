@@ -43,6 +43,16 @@ void mkPerspective4x4(float fov, float aspect, float znear, float zfar,
   memcpy(result, n, 16 * sizeof(float));
 }
 
+void mkScale4x4(float *scale, float *result) {
+  float n[16] = {
+      scale[0], 0.0f,     0.0f,     0.0f, // 1
+      0.0f,     scale[1], 0.0f,     0.0f, // 2
+      0.0f,     0.0f,     scale[2], 0.0f, // 3
+      0.0f,     0.0f,     0.0f,     1.0f, // 4
+  };
+  memcpy(result, n, 16 * sizeof(float));
+}
+
 void mkTranslation4x4(float *translation, float *result) {
   float n[16] = {
       1.0f,           0.0f,           0.0f,           0.0f, // 1

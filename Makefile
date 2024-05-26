@@ -27,7 +27,7 @@ debug:
 
 leak-check:
 	#valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --log-file=leak.txt ./build/app
-	valgrind --leak-check=yes --log-file=leak.txt ./build/miso
+	valgrind --leak-check=full --log-file=leak.txt ./build/miso
 
 clean:
 	rm -rf $(BUILD_DIR)/*

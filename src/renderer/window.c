@@ -25,7 +25,7 @@ GLFWwindow *GetWindow() {
     /* glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); */
 
     glfwSetErrorCallback(error_callback);
-    window = glfwCreateWindow(w, h, "LearnOpenGL", NULL, NULL);
+    window = glfwCreateWindow(w, h, "GLFW", NULL, NULL);
     if (window == NULL) {
       printf("Failed to create GLFW window");
       glfwTerminate();

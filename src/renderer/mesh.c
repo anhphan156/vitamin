@@ -3,8 +3,9 @@
 #include "stdinc.h"
 
 struct Mesh *CreateMesh(float *positions, unsigned int position_count,
-                        unsigned int *indices, unsigned int index_count) {
+                        unsigned int *indices, unsigned int indices_count) {
   struct Mesh *m = (struct Mesh *)malloc(sizeof(struct Mesh));
+  m->indices_count = indices_count;
 
   GLCall(glGenVertexArrays(1, &m->vao));
   GLCall(glBindVertexArray(m->vao));
@@ -17,7 +18,7 @@ struct Mesh *CreateMesh(float *positions, unsigned int position_count,
   GLCall(glGenBuffers(1, &m->ibo));
   GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m->ibo));
   GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-                      index_count * sizeof(unsigned int), indices,
+                      indices_count * sizeof(unsigned int), indices,
                       GL_STATIC_DRAW));
 
   // attributes
