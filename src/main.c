@@ -1,8 +1,5 @@
-#define CIMGUI_DEFINE_ENUMS_AND_STRUCTS
-#define CIMGUI_USE_OPENGL3
-#define CIMGUI_USE_GLFW
-#include "cimgui.h"
-#include "cimgui_impl.h"
+#include "imguiLayers/includes.h"
+#include "imguiLayers/init.h"
 #include "math/math.h"
 #include "renderer/mesh.h"
 #include "renderer/model_loader.h"
@@ -12,26 +9,13 @@
 struct ImGuiContext *ctx;
 struct ImGuiIO *io;
 
-void gui_init(GLFWwindow *win) {
-  // IMGUI_CHECKVERSION();
-  ctx = igCreateContext(NULL);
-  io = igGetIO();
-
-  const char *glsl_version = "#version 460 core";
-  ImGui_ImplGlfw_InitForOpenGL(win, true);
-  ImGui_ImplOpenGL3_Init(glsl_version);
-
-  // Setup style
-  igStyleColorsDark(NULL);
-}
-
 int main() {
   GLFWwindow *window = GetWindow();
   if (window == NULL) {
     return 1;
   }
   glewInit();
-  gui_init(window);
+  gui_init(window, &ctx, &io);
 
   const char model_path[50] =
       "/home/backspace/data/dev/miso/resources/cube.obj";
@@ -87,9 +71,7 @@ int main() {
   while (!glfwWindowShouldClose(window)) {
     printf("%f\n", fr++ / glfwGetTime());
 
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    igNewFrame();
+    IMGUI_NEW_FRAME
 
     igBegin("imgui Window", &showWindow, 0);
     igDragFloat("Freq", &freq, .1f, 0.0f, 5.0f, "%.3f", 0);
@@ -144,8 +126,7 @@ int main() {
     GLCall(glDrawElementsInstanced(GL_TRIANGLES, mesh->indices_count,
                                    GL_UNSIGNED_INT, NULL, meshes_count));
 
-    igRender();
-    ImGui_ImplOpenGL3_RenderDrawData(igGetDrawData());
+    IMGUI_RENDER
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
