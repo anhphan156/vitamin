@@ -1,8 +1,29 @@
+#define CIMGUI_DEFINE_ENUMS_AND_STRUCTS
+#define CIMGUI_USE_OPENGL3
+#define CIMGUI_USE_GLFW
+#include "cimgui.h"
+#include "cimgui_impl.h"
 #include "math/math.h"
 #include "renderer/mesh.h"
 #include "renderer/model_loader.h"
 #include "renderer/stdinc.h"
 #include "renderer/window.h"
+
+struct ImGuiContext *ctx;
+struct ImGuiIO *io;
+
+void gui_init(GLFWwindow *win) {
+  // IMGUI_CHECKVERSION();
+  ctx = igCreateContext(NULL);
+  io = igGetIO();
+
+  const char *glsl_version = "#version 460 core";
+  ImGui_ImplGlfw_InitForOpenGL(win, true);
+  ImGui_ImplOpenGL3_Init(glsl_version);
+
+  // Setup style
+  igStyleColorsDark(NULL);
+}
 
 int main() {
   GLFWwindow *window = GetWindow();
@@ -10,6 +31,7 @@ int main() {
     return 1;
   }
   glewInit();
+  gui_init(window);
 
   const char model_path[50] =
       "/home/backspace/data/dev/miso/resources/cube.obj";
@@ -20,7 +42,7 @@ int main() {
   load_model(model_path, &positions, &positions_count, &indices,
              &indices_count);
 
-  unsigned int meshes_count = 50;
+  unsigned int meshes_count = 200;
   struct Mesh *mesh =
       CreateMesh(positions, positions_count, indices, indices_count);
 
@@ -57,19 +79,44 @@ int main() {
   matrixMul(perspective, view, view_proj);
 
   float step = 2.0f / meshes_count;
-  float ls = step * 1.f;
+  float ls = step * 2.f;
   float lscale[3] = {ls, ls, ls};
 
+  bool showAnotherWindow = true;
   unsigned long fr = 0;
   while (!glfwWindowShouldClose(window)) {
     printf("%f\n", fr++ / glfwGetTime());
+
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    igNewFrame();
+
+    if (showAnotherWindow) {
+      igBegin("imgui Another Window", &showAnotherWindow, 0);
+      igText("Hello from imgui");
+      ImVec2 buttonSize;
+      buttonSize.x = 0;
+      buttonSize.y = 0;
+      if (igButton("Close me", buttonSize)) {
+        showAnotherWindow = false;
+      }
+      igEnd();
+    }
+
+    igRender();
     GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
     for (int i = 0; i < meshes_count; i++) {
       double t = glfwGetTime();
 
       float px = ((float)i + 0.5f) * step - 1.0f;
-      float py = sin(px * 3.14f + t);
+
+      float py;
+      if (i % 2 == 0) {
+        py = sin(px * 3.14f + t);
+      } else {
+        py = sin(px * 3.14f + t - 3.14f);
+      }
 
       float p[3] = {px, py, 2.0f};
       memcpy(mesh->position, p, sizeof(float) * 3);
@@ -100,6 +147,7 @@ int main() {
     GLCall(glDrawElementsInstanced(GL_TRIANGLES, mesh->indices_count,
                                    GL_UNSIGNED_INT, NULL, meshes_count));
 
+    ImGui_ImplOpenGL3_RenderDrawData(igGetDrawData());
     glfwSwapBuffers(window);
     glfwPollEvents();
   }

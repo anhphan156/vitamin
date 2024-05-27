@@ -21,4 +21,8 @@ void mkRotation2x2(float a, float *result);
 
 void cross(float *a, float *b, float *result);
 
+void normalize(float *v, float *result);
+
+float lengthSquare(float *v);
+
 #endif

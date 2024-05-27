@@ -117,3 +117,11 @@ void cross(float *a, float *b, float *result) {
   };
   memcpy(result, n, sizeof(float) * 3);
 }
+
+void normalize(float *v, float *result) {
+  float length = sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+  float n[3] = {v[0] / length, v[1] / length, v[2] / length};
+  memcpy(result, n, sizeof(float) * 3);
+}
+
+float lengthSquare(float *v) { return v[0] * v[0] + v[1] * v[1] + v[2] * v[2]; }
