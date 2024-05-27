@@ -20,7 +20,7 @@ int main() {
   load_model(model_path, &positions, &positions_count, &indices,
              &indices_count);
 
-  unsigned int meshes_count = 5000;
+  unsigned int meshes_count = 50;
   struct Mesh *mesh =
       CreateMesh(positions, positions_count, indices, indices_count);
 
@@ -41,15 +41,23 @@ int main() {
   float translation[16];
   float scale[16];
   float rotation[16];
+  float view[16];
   float perspective[16];
+  float view_proj[16];
   float r[16];
 
   float *modelMatrices = (float *)alloca(modelMatricesBufferDataSize);
 
   mkPerspective4x4(3.14f / 4.0f, GetAspectRatio(), 1.0f, 100.0f, perspective);
 
+  float up[3] = {0.0f, 1.0f, 0.0f};
+  float forward[3] = {0.0f, .0f, 1.0f};
+  float camera_pos[3] = {0.0f, 0.0f, 0.0f};
+  mkLookAt4x4(up, forward, camera_pos, view);
+  matrixMul(perspective, view, view_proj);
+
   float step = 2.0f / meshes_count;
-  float ls = step * 5.f;
+  float ls = step * 1.f;
   float lscale[3] = {ls, ls, ls};
 
   unsigned long fr = 0;
@@ -68,7 +76,7 @@ int main() {
       memcpy(mesh->scale, lscale, sizeof(float) * 3);
 
       mkTranslation4x4(mesh->position, translation);
-      mkRotationY4x4(t, rotation);
+      mkRotationY4x4(0.0f, rotation);
       mkScale4x4(mesh->scale, scale);
       matrixMul(rotation, scale, r);
       matrixMul(translation, r, r);
@@ -85,12 +93,12 @@ int main() {
     GLCall(glBindVertexArray(mesh->vao));
     GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ibo));
     GLCall(glUseProgram(mesh->shader_program));
-    GLCall(glDrawElementsInstanced(GL_TRIANGLES, mesh->indices_count,
-                                   GL_UNSIGNED_INT, NULL, meshes_count));
     GLCall(int loc = glGetUniformLocation(mesh->shader_program, "u_vp"));
     if (loc != -1) {
-      GLCall(glUniformMatrix4fv(loc, 1, GL_FALSE, perspective));
+      GLCall(glUniformMatrix4fv(loc, 1, GL_FALSE, view_proj));
     }
+    GLCall(glDrawElementsInstanced(GL_TRIANGLES, mesh->indices_count,
+                                   GL_UNSIGNED_INT, NULL, meshes_count));
 
     glfwSwapBuffers(window);
     glfwPollEvents();
