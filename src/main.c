@@ -42,7 +42,7 @@ int main() {
   load_model(model_path, &positions, &positions_count, &indices,
              &indices_count);
 
-  unsigned int meshes_count = 200;
+  unsigned int meshes_count = 5000;
   struct Mesh *mesh =
       CreateMesh(positions, positions_count, indices, indices_count);
 
@@ -78,12 +78,12 @@ int main() {
   mkLookAt4x4(up, forward, camera_pos, view);
   matrixMul(perspective, view, view_proj);
 
-  float step = 2.0f / meshes_count;
-  float ls = step * 2.f;
-  float lscale[3] = {ls, ls, ls};
+  float ls = 2.f;
 
-  bool showAnotherWindow = true;
+  float freq = 1.0f;
+  float amp = 1.0f;
   unsigned long fr = 0;
+  bool showWindow = true;
   while (!glfwWindowShouldClose(window)) {
     printf("%f\n", fr++ / glfwGetTime());
 
@@ -91,35 +91,32 @@ int main() {
     ImGui_ImplGlfw_NewFrame();
     igNewFrame();
 
-    if (showAnotherWindow) {
-      igBegin("imgui Another Window", &showAnotherWindow, 0);
-      igText("Hello from imgui");
-      ImVec2 buttonSize;
-      buttonSize.x = 0;
-      buttonSize.y = 0;
-      if (igButton("Close me", buttonSize)) {
-        showAnotherWindow = false;
-      }
-      igEnd();
-    }
+    igBegin("imgui Window", &showWindow, 0);
+    igDragFloat("Freq", &freq, .1f, 0.0f, 5.0f, "%.3f", 0);
+    igDragFloat("Amp", &amp, .1f, 0.0f, 5.0f, "%.3f", 0);
+    igDragFloat("Scale", &ls, .1f, 1.0f, 20.0f, "%.3f", 0);
+    igInputInt("Count", &meshes_count, 0, 0, 0);
+    igEnd();
 
-    igRender();
     GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
     for (int i = 0; i < meshes_count; i++) {
       double t = glfwGetTime();
 
+      float step = 2.0f / meshes_count;
       float px = ((float)i + 0.5f) * step - 1.0f;
 
       float py;
       if (i % 2 == 0) {
-        py = sin(px * 3.14f + t);
+        py = sin(px * 3.14f * freq + t) * amp;
       } else {
-        py = sin(px * 3.14f + t - 3.14f);
+        py = sin(px * 3.14f * freq + t - 3.14f) * amp;
       }
 
       float p[3] = {px, py, 2.0f};
       memcpy(mesh->position, p, sizeof(float) * 3);
+
+      float lscale[3] = {ls * step, ls * step, ls * step};
       memcpy(mesh->scale, lscale, sizeof(float) * 3);
 
       mkTranslation4x4(mesh->position, translation);
@@ -147,6 +144,7 @@ int main() {
     GLCall(glDrawElementsInstanced(GL_TRIANGLES, mesh->indices_count,
                                    GL_UNSIGNED_INT, NULL, meshes_count));
 
+    igRender();
     ImGui_ImplOpenGL3_RenderDrawData(igGetDrawData());
     glfwSwapBuffers(window);
     glfwPollEvents();
