@@ -21,13 +21,8 @@ int main() {
              &indices_count);
 
   unsigned int meshes_count = 5000;
-  struct Mesh **meshes = alloca(sizeof(struct Mesh *) * meshes_count);
-  for (int i = 0; i < meshes_count; i++) {
-    meshes[i] = CreateMesh(positions, positions_count, indices, indices_count);
-    if (meshes[i] == NULL) {
-      return 1;
-    }
-  }
+  struct Mesh *mesh =
+      CreateMesh(positions, positions_count, indices, indices_count);
 
   free(positions);
   free(indices);
@@ -63,8 +58,6 @@ int main() {
     GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
     for (int i = 0; i < meshes_count; i++) {
-      struct Mesh *mesh = meshes[i];
-
       double t = glfwGetTime();
 
       float px = ((float)i + 0.5f) * step - 1.0f;
@@ -82,12 +75,6 @@ int main() {
 
       memcpy(modelMatrices + i * 16, r, sizeof(float) * 16);
 
-      GLCall(int loc = glGetUniformLocation(mesh->shader_program, "u_vp"));
-      if (loc != -1) {
-        GLCall(glUseProgram(meshes[i]->shader_program));
-        GLCall(glUniformMatrix4fv(loc, 1, GL_FALSE, perspective));
-      }
-
       /*GLCall(glDrawElements(GL_TRIANGLES, mesh->indices_count,
        * GL_UNSIGNED_INT,*/
       /*                      NULL));*/
@@ -95,19 +82,21 @@ int main() {
     GLCall(glNamedBufferSubData(modelMatricesBuffer, 0,
                                 modelMatricesBufferDataSize, modelMatrices));
     GLCall(glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, modelMatricesBuffer));
-    GLCall(glBindVertexArray(meshes[0]->vao));
-    GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshes[0]->ibo));
-    GLCall(glUseProgram(meshes[0]->shader_program));
-    GLCall(glDrawElementsInstanced(GL_TRIANGLES, meshes[0]->indices_count,
+    GLCall(glBindVertexArray(mesh->vao));
+    GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ibo));
+    GLCall(glUseProgram(mesh->shader_program));
+    GLCall(glDrawElementsInstanced(GL_TRIANGLES, mesh->indices_count,
                                    GL_UNSIGNED_INT, NULL, meshes_count));
+    GLCall(int loc = glGetUniformLocation(mesh->shader_program, "u_vp"));
+    if (loc != -1) {
+      GLCall(glUniformMatrix4fv(loc, 1, GL_FALSE, perspective));
+    }
 
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
 
-  for (int i = 0; i < meshes_count; i++) {
-    ClearMesh(meshes[i]);
-  }
+  ClearMesh(mesh);
   glfwTerminate();
 
   return 0;
