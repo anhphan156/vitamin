@@ -7,10 +7,6 @@ void gui_init(struct GLFWwindow *win, struct ImGuiContext **ctx,
   // IMGUI_CHECKVERSION();
   *ctx = igCreateContext(NULL);
   *io = igGetIO();
-  (*io)->ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable Docking
-  (*io)->ConfigFlags |=
-      ImGuiConfigFlags_ViewportsEnable; // Enable Multi-Viewport
-                                        // / Platform Windows
 
   const char *glsl_version = "#version 460 core";
   ImGui_ImplGlfw_InitForOpenGL(win, true);

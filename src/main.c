@@ -3,6 +3,7 @@
 #include "math/math.h"
 #include "renderer/mesh.h"
 #include "renderer/model_loader.h"
+#include "renderer/shader.h"
 #include "renderer/stdinc.h"
 #include "renderer/window.h"
 
@@ -26,23 +27,30 @@ int main() {
   load_model(model_path, &positions, &positions_count, &indices,
              &indices_count);
 
-  unsigned int meshes_count = 5000;
+  unsigned int meshes_count = 1000;
   struct Mesh *mesh =
       CreateMesh(positions, positions_count, indices, indices_count);
 
   free(positions);
   free(indices);
 
-  unsigned int modelMatricesBufferDataSize = sizeof(float) * 16 * meshes_count;
-  unsigned int modelMatricesBuffer;
-  GLCall(glCreateBuffers(1, &modelMatricesBuffer));
-  GLCall(glNamedBufferStorage(modelMatricesBuffer, modelMatricesBufferDataSize,
-                              NULL, GL_DYNAMIC_STORAGE_BIT));
+  unsigned int positionBufferSize =
+      sizeof(float) * 4 * meshes_count * meshes_count;
+  unsigned int positionBuffer;
+  GLCall(glCreateBuffers(1, &positionBuffer));
+  GLCall(glNamedBufferData(positionBuffer, positionBufferSize, NULL,
+                           GL_DYNAMIC_DRAW));
+  /*GLCall(glNamedBufferStorage(positionBuffer, positionBufferSize, NULL,*/
+  /*                            GL_DYNAMIC_STORAGE_BIT));*/
 
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_CULL_FACE);
   glCullFace(GL_BACK);
   glFrontFace(GL_CW);
+
+  char compute_path[66] =
+      "/home/backspace/data/dev/miso/resources/shaders/position.compute";
+  unsigned int cs_program = create_compute_shader_program(compute_path);
 
   float translation[16];
   float scale[16];
@@ -52,12 +60,12 @@ int main() {
   float view_proj[16];
   float r[16];
 
-  float *modelMatrices = (float *)alloca(modelMatricesBufferDataSize);
-
   mkPerspective4x4(3.14f / 4.0f, GetAspectRatio(), 1.0f, 100.0f, perspective);
 
   float up[3] = {0.0f, 1.0f, 0.0f};
-  float forward[3] = {0.0f, .0f, 1.0f};
+  float forward_tmp[3] = {0.0f, 0.0f, 1.0f};
+  float forward[3];
+  normalize(forward_tmp, forward);
   float camera_pos[3] = {0.0f, 0.0f, 0.0f};
   mkLookAt4x4(up, forward, camera_pos, view);
   matrixMul(perspective, view, view_proj);
@@ -68,70 +76,59 @@ int main() {
   float amp = 1.0f;
   unsigned long fr = 0;
   bool showWindow = true;
+
+  float *data = (float *)alloca(positionBufferSize);
+
   while (!glfwWindowShouldClose(window)) {
     printf("%f\n", fr++ / glfwGetTime());
 
-    IMGUI_NEW_FRAME
+    // IMGUI_NEW_FRAME
 
-    igBegin("imgui Window", &showWindow, 0);
-    igDragFloat("Freq", &freq, .1f, 0.0f, 5.0f, "%.3f", 0);
-    igDragFloat("Amp", &amp, .1f, 0.0f, 5.0f, "%.3f", 0);
-    igDragFloat("Scale", &ls, .1f, 1.0f, 20.0f, "%.3f", 0);
-    igInputInt("Count", &meshes_count, 0, 0, 0);
-    igEnd();
+    /*igBegin("imgui Window", &showWindow, 0);*/
+    /*igDragFloat("Freq", &freq, .1f, 0.0f, 5.0f, "%.3f", 0);*/
+    /*igDragFloat("Amp", &amp, .1f, 0.0f, 5.0f, "%.3f", 0);*/
+    /*igDragFloat("Scale", &ls, .1f, 1.0f, 20.0f, "%.3f", 0);*/
+    /*igInputInt("Count", (int *)&meshes_count, 0, 0, 0);*/
+    /*igEnd();*/
 
     GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
-    for (int i = 0; i < meshes_count; i++) {
-      double t = glfwGetTime();
-
-      float step = 2.0f / meshes_count;
-      float px = ((float)i + 0.5f) * step - 1.0f;
-
-      float py;
-      if (i % 2 == 0) {
-        py = sin(px * 3.14f * freq + t) * amp;
-      } else {
-        py = sin(px * 3.14f * freq + t - 3.14f) * amp;
-      }
-
-      float p[3] = {px, py, 2.0f};
-      memcpy(mesh->position, p, sizeof(float) * 3);
-
-      float lscale[3] = {ls * step, ls * step, ls * step};
-      memcpy(mesh->scale, lscale, sizeof(float) * 3);
-
-      mkTranslation4x4(mesh->position, translation);
-      mkRotationY4x4(0.0f, rotation);
-      mkScale4x4(mesh->scale, scale);
-      matrixMul(rotation, scale, r);
-      matrixMul(translation, r, r);
-
-      memcpy(modelMatrices + i * 16, r, sizeof(float) * 16);
-
-      /*GLCall(glDrawElements(GL_TRIANGLES, mesh->indices_count,
-       * GL_UNSIGNED_INT,*/
-      /*                      NULL));*/
+    GLCall(glUseProgram(cs_program));
+    GLCall(int loc = glGetUniformLocation(cs_program, "_Resolution"));
+    if (loc != -1) {
+      GLCall(glUniform1i(loc, meshes_count));
     }
-    GLCall(glNamedBufferSubData(modelMatricesBuffer, 0,
-                                modelMatricesBufferDataSize, modelMatrices));
-    GLCall(glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, modelMatricesBuffer));
+    GLCall(loc = glGetUniformLocation(cs_program, "_Step"));
+    if (loc != -1) {
+      GLCall(glUniform1f(loc, 2.0 / meshes_count));
+    }
+    GLCall(loc = glGetUniformLocation(cs_program, "_t"));
+    if (loc != -1) {
+      GLCall(glUniform1f(loc, glfwGetTime()));
+    }
+    GLCall(glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, positionBuffer));
+    int groups = meshes_count / 8 + 1;
+    GLCall(glDispatchCompute(groups, groups, 1));
+    GLCall(glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT));
+
     GLCall(glBindVertexArray(mesh->vao));
     GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ibo));
     GLCall(glUseProgram(mesh->shader_program));
-    GLCall(int loc = glGetUniformLocation(mesh->shader_program, "u_vp"));
+    GLCall(loc = glGetUniformLocation(mesh->shader_program, "u_vp"));
     if (loc != -1) {
       GLCall(glUniformMatrix4fv(loc, 1, GL_FALSE, view_proj));
     }
     GLCall(glDrawElementsInstanced(GL_TRIANGLES, mesh->indices_count,
-                                   GL_UNSIGNED_INT, NULL, meshes_count));
+                                   GL_UNSIGNED_INT, NULL,
+                                   meshes_count * meshes_count));
 
-    IMGUI_RENDER
+    // IMGUI_RENDER
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
 
   ClearMesh(mesh);
+  glDeleteBuffers(1, &positionBuffer);
   glfwTerminate();
 
   return 0;

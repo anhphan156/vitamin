@@ -11,13 +11,30 @@ uniform mat4 u_mvp;
 uniform mat4 u_vp;
 
 layout(binding = 2, std430) buffer ssbo1 {
-	mat4 modelMatrices[];
+	vec4 _Position[];
 };
 
 void main(){
-    i_normal = normal;
-    i_uv = texCoord;
+	i_normal = normal;
+	i_uv = texCoord;
 
-    gl_Position = u_vp * modelMatrices[gl_InstanceID] * position;
-    //gl_Position = u_mvp * position;
+	float s = 1.0 / 50.0;
+	mat4 scale = mat4(
+		s, 0.0, 0.0, 0.0,
+		0.0, s, 0.0, 0.0,
+		0.0, 0.0, s, 0.0,
+		0.0, 0.0, 0.0, 1.0
+	);
+
+	vec4 p = _Position[gl_InstanceID];
+	p.z += 2.0;
+
+	mat4 translation = mat4(
+		1.0, 0.0, 0.0, 0.0,
+		0.0, 1.0, 0.0, 0.0,
+		0.0, 0.0, 1.0, 0.0,
+		p.x, p.y, p.z, 1.0
+	);
+	mat4 m = u_vp * translation * scale;
+	gl_Position =  m * position;
 }

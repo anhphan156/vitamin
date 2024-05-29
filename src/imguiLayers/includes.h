@@ -14,13 +14,12 @@
 
 #define IMGUI_RENDER                                                           \
   igRender();                                                                  \
-  glfwMakeContextCurrent(window);                                              \
   ImGui_ImplOpenGL3_RenderDrawData(igGetDrawData());                           \
-  if (io->ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {                    \
-    GLFWwindow *backup_current_window = glfwGetCurrentContext();               \
-    igUpdatePlatformWindows();                                                 \
-    igRenderPlatformWindowsDefault(NULL, NULL);                                \
-    glfwMakeContextCurrent(backup_current_window);                             \
-  }
+/*if (io->ConfigFlags & ImGuiConfigFlags_ViewportsEnable) { \*/
+/*  GLFWwindow *backup_current_window = glfwGetCurrentContext(); \*/
+/*  igUpdatePlatformWindows(); \*/
+/*  igRenderPlatformWindowsDefault(NULL, NULL); \*/
+/*  glfwMakeContextCurrent(backup_current_window); \*/
+/*}*/
 
 #endif
