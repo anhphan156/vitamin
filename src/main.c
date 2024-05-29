@@ -27,7 +27,7 @@ int main() {
   load_model(model_path, &positions, &positions_count, &indices,
              &indices_count);
 
-  unsigned int meshes_count = 1000;
+  unsigned int meshes_count = 200;
   struct Mesh *mesh =
       CreateMesh(positions, positions_count, indices, indices_count);
 
@@ -40,8 +40,6 @@ int main() {
   GLCall(glCreateBuffers(1, &positionBuffer));
   GLCall(glNamedBufferData(positionBuffer, positionBufferSize, NULL,
                            GL_DYNAMIC_DRAW));
-  /*GLCall(glNamedBufferStorage(positionBuffer, positionBufferSize, NULL,*/
-  /*                            GL_DYNAMIC_STORAGE_BIT));*/
 
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_CULL_FACE);
@@ -52,21 +50,17 @@ int main() {
       "/home/backspace/data/dev/miso/resources/shaders/position.compute";
   unsigned int cs_program = create_compute_shader_program(compute_path);
 
-  float translation[16];
-  float scale[16];
-  float rotation[16];
   float view[16];
   float perspective[16];
   float view_proj[16];
-  float r[16];
 
   mkPerspective4x4(3.14f / 4.0f, GetAspectRatio(), 1.0f, 100.0f, perspective);
 
   float up[3] = {0.0f, 1.0f, 0.0f};
-  float forward_tmp[3] = {0.0f, 0.0f, 1.0f};
+  float forward_tmp[3] = {0.0f, -1.0f, 2.0f};
   float forward[3];
   normalize(forward_tmp, forward);
-  float camera_pos[3] = {0.0f, 0.0f, 0.0f};
+  float camera_pos[3] = {0.0f, 1.0f, 0.0f};
   mkLookAt4x4(up, forward, camera_pos, view);
   matrixMul(perspective, view, view_proj);
 
@@ -76,8 +70,6 @@ int main() {
   float amp = 1.0f;
   unsigned long fr = 0;
   bool showWindow = true;
-
-  float *data = (float *)alloca(positionBufferSize);
 
   while (!glfwWindowShouldClose(window)) {
     printf("%f\n", fr++ / glfwGetTime());

@@ -28,6 +28,8 @@ void mkLookAt4x4(float *up, float *forward, float *position, float *result) {
   float right[3];
   cross(up, forward, right);
 
+  cross(forward, right, up);
+
   float n[16];
   float lookAt[16] = {
       right[0], up[0], forward[0], 0.0f, // 1
