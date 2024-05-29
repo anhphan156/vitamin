@@ -27,7 +27,7 @@ int main() {
   load_model(model_path, &positions, &positions_count, &indices,
              &indices_count);
 
-  unsigned int meshes_count = 200;
+  unsigned int meshes_count = 1000;
   struct Mesh *mesh =
       CreateMesh(positions, positions_count, indices, indices_count);
 
@@ -71,33 +71,31 @@ int main() {
   unsigned long fr = 0;
   bool showWindow = true;
 
+  meshes_count = 200;
   while (!glfwWindowShouldClose(window)) {
     printf("%f\n", fr++ / glfwGetTime());
 
-    // IMGUI_NEW_FRAME
+    IMGUI_NEW_FRAME
 
-    /*igBegin("imgui Window", &showWindow, 0);*/
-    /*igDragFloat("Freq", &freq, .1f, 0.0f, 5.0f, "%.3f", 0);*/
-    /*igDragFloat("Amp", &amp, .1f, 0.0f, 5.0f, "%.3f", 0);*/
-    /*igDragFloat("Scale", &ls, .1f, 1.0f, 20.0f, "%.3f", 0);*/
-    /*igInputInt("Count", (int *)&meshes_count, 0, 0, 0);*/
-    /*igEnd();*/
+    igBegin("imgui Window", &showWindow, 0);
+    igDragFloat("Freq", &freq, .1f, 0.0f, 20.0f, "%.3f", 0);
+    igDragFloat("Amp", &amp, .1f, 0.0f, 5.0f, "%.3f", 0);
+    igDragFloat("Scale", &ls, .1f, 1.0f, 20.0f, "%.3f", 0);
+    igInputInt("Count", (int *)&meshes_count, 0, 0, 0);
+    igEnd();
 
     GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
     GLCall(glUseProgram(cs_program));
     GLCall(int loc = glGetUniformLocation(cs_program, "_Resolution"));
-    if (loc != -1) {
+    if (loc != -1)
       GLCall(glUniform1i(loc, meshes_count));
-    }
-    GLCall(loc = glGetUniformLocation(cs_program, "_Step"));
-    if (loc != -1) {
-      GLCall(glUniform1f(loc, 2.0 / meshes_count));
-    }
-    GLCall(loc = glGetUniformLocation(cs_program, "_t"));
-    if (loc != -1) {
-      GLCall(glUniform1f(loc, glfwGetTime()));
-    }
+    uniform1i(cs_program, "_Resolution", meshes_count);
+    uniform1f(cs_program, "_t", glfwGetTime());
+    uniform1f(cs_program, "_Step", 2.0 / meshes_count);
+    uniform1f(cs_program, "_Freq", freq);
+    uniform1f(cs_program, "_Amp", amp);
+
     GLCall(glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, positionBuffer));
     int groups = meshes_count / 8 + 1;
     GLCall(glDispatchCompute(groups, groups, 1));
@@ -105,16 +103,17 @@ int main() {
 
     GLCall(glBindVertexArray(mesh->vao));
     GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ibo));
+
     GLCall(glUseProgram(mesh->shader_program));
-    GLCall(loc = glGetUniformLocation(mesh->shader_program, "u_vp"));
-    if (loc != -1) {
-      GLCall(glUniformMatrix4fv(loc, 1, GL_FALSE, view_proj));
-    }
+    uniformm4f(mesh->shader_program, "u_vp", view_proj);
+    uniform1f(mesh->shader_program, "u_baseScale", ls);
+    uniform1f(mesh->shader_program, "u_resolution", meshes_count);
+
     GLCall(glDrawElementsInstanced(GL_TRIANGLES, mesh->indices_count,
                                    GL_UNSIGNED_INT, NULL,
                                    meshes_count * meshes_count));
 
-    // IMGUI_RENDER
+    IMGUI_RENDER
     glfwSwapBuffers(window);
     glfwPollEvents();
   }

@@ -9,11 +9,13 @@ layout (binding = 2, std430) buffer ssbo1 {
 uniform float _Step;
 uniform float _t;
 uniform int _Resolution;
+uniform float _Freq;
+uniform float _Amp;
 
 void main(){
 	vec2 uv = (gl_GlobalInvocationID.xy + 0.5) * _Step - 1.0; 
 
-	vec4 p = vec4(uv.x, sin(length(uv) * 10.0 - _t) * .05, uv.y, 1.0);
+	vec4 p = vec4(uv.x, sin(length(uv) * _Freq - _t) * _Amp, uv.y, 1.0);
 
 	if(gl_GlobalInvocationID.x < _Resolution && gl_GlobalInvocationID.y < _Resolution){
 		_Position[gl_GlobalInvocationID.x + gl_GlobalInvocationID.y * _Resolution] = p;

@@ -82,3 +82,19 @@ unsigned int create_compute_shader_program(char *file_path) {
 
   return program;
 }
+
+void uniform1f(unsigned int program, char *name, float value) {
+  GLCall(int loc = glGetUniformLocation(program, name));
+  if (loc != -1)
+    GLCall(glUniform1f(loc, value));
+}
+void uniform1i(unsigned int program, char *name, int value) {
+  GLCall(int loc = glGetUniformLocation(program, name));
+  if (loc != -1)
+    GLCall(glUniform1i(loc, value));
+}
+void uniformm4f(unsigned int program, char *name, float *value) {
+  GLCall(int loc = glGetUniformLocation(program, name));
+  if (loc != -1)
+    GLCall(glUniformMatrix4fv(loc, 1, GL_FALSE, value));
+}

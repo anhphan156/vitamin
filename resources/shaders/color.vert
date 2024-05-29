@@ -10,6 +10,9 @@ out vec2 i_uv;
 uniform mat4 u_mvp;
 uniform mat4 u_vp;
 
+uniform float u_baseScale;
+uniform float u_resolution;
+
 layout(binding = 2, std430) buffer ssbo1 {
 	vec4 _Position[];
 };
@@ -18,7 +21,7 @@ void main(){
 	i_normal = normal;
 	i_uv = texCoord;
 
-	float s = 1.0 / 50.0;
+	float s = u_baseScale * 0.5 / u_resolution;
 	mat4 scale = mat4(
 		s, 0.0, 0.0, 0.0,
 		0.0, s, 0.0, 0.0,
