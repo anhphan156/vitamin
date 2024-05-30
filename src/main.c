@@ -71,30 +71,33 @@ int main() {
   unsigned long fr = 0;
   bool showWindow = true;
 
+  float lPos[3] = {0.0f, 10.0f, -3.0f};
+  float shape = 1.0f;
+
   meshes_count = 200;
   while (!glfwWindowShouldClose(window)) {
-    printf("%f\n", fr++ / glfwGetTime());
 
     IMGUI_NEW_FRAME
 
     igBegin("imgui Window", &showWindow, 0);
+    igDragFloat("Shape", &shape, .01f, 0.f, 1.0f, "%.2f", 0);
     igDragFloat("Freq", &freq, .1f, 0.0f, 20.0f, "%.3f", 0);
-    igDragFloat("Amp", &amp, .1f, 0.0f, 5.0f, "%.3f", 0);
-    igDragFloat("Scale", &ls, .1f, 1.0f, 20.0f, "%.3f", 0);
+    igDragFloat("Amp", &amp, .05f, 0.0f, 5.0f, "%.3f", 0);
+    igDragFloat("Scale", &ls, .1f, .1f, 20.0f, "%.3f", 0);
     igInputInt("Count", (int *)&meshes_count, 0, 0, 0);
+    igSliderFloat3("Light Pos", lPos, -10.0f, 10.0f, "%.2f", 0);
+    igText("FPS: %f", fr++ / glfwGetTime());
     igEnd();
 
     GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
     GLCall(glUseProgram(cs_program));
-    GLCall(int loc = glGetUniformLocation(cs_program, "_Resolution"));
-    if (loc != -1)
-      GLCall(glUniform1i(loc, meshes_count));
     uniform1i(cs_program, "_Resolution", meshes_count);
     uniform1f(cs_program, "_t", glfwGetTime());
     uniform1f(cs_program, "_Step", 2.0 / meshes_count);
     uniform1f(cs_program, "_Freq", freq);
     uniform1f(cs_program, "_Amp", amp);
+    uniform1f(cs_program, "_Shape", shape);
 
     GLCall(glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, positionBuffer));
     int groups = meshes_count / 8 + 1;
@@ -108,6 +111,8 @@ int main() {
     uniformm4f(mesh->shader_program, "u_vp", view_proj);
     uniform1f(mesh->shader_program, "u_baseScale", ls);
     uniform1f(mesh->shader_program, "u_resolution", meshes_count);
+    uniform1f(mesh->shader_program, "u_time", glfwGetTime());
+    uniform3fv(mesh->shader_program, "u_lightPos", lPos);
 
     GLCall(glDrawElementsInstanced(GL_TRIANGLES, mesh->indices_count,
                                    GL_UNSIGNED_INT, NULL,

@@ -98,3 +98,8 @@ void uniformm4f(unsigned int program, char *name, float *value) {
   if (loc != -1)
     GLCall(glUniformMatrix4fv(loc, 1, GL_FALSE, value));
 }
+void uniform3fv(unsigned int program, char *name, float *value) {
+  GLCall(int loc = glGetUniformLocation(program, name));
+  if (loc != -1)
+    GLCall(glUniform3fv(loc, 1, value));
+}

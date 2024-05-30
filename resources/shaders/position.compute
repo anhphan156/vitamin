@@ -11,11 +11,16 @@ uniform float _t;
 uniform int _Resolution;
 uniform float _Freq;
 uniform float _Amp;
+uniform float _Shape;
 
 void main(){
 	vec2 uv = (gl_GlobalInvocationID.xy + 0.5) * _Step - 1.0; 
 
-	vec4 p = vec4(uv.x, sin(length(uv) * _Freq - _t) * _Amp, uv.y, 1.0);
+	vec4 p1 = vec4(uv.x, sin(length(uv) * _Freq - _t) * _Amp, uv.y, 1.0);
+	float r = sin(_Freq / 10. * 1.57 * uv.y + uv.x - _t);
+	vec4 p2 = vec4(r*cos(uv.x * 3.14), sin(uv.y * 1.57) * _Amp, r*sin(uv.x * 3.14), 1.0);
+
+	vec4 p = mix(p1, p2, _Shape);
 
 	if(gl_GlobalInvocationID.x < _Resolution && gl_GlobalInvocationID.y < _Resolution){
 		_Position[gl_GlobalInvocationID.x + gl_GlobalInvocationID.y * _Resolution] = p;
