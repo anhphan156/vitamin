@@ -1,25 +1,32 @@
 #include "shader.h"
 #include "stdinc.h"
 #include <alloca.h>
+#include <fcntl.h>
+#include <stdio.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
-char *load_shader_source(char *file_name) {
-  char *buffer = 0;
-  long length;
-  FILE *f = fopen(file_name, "r");
+char *load_shader_source(char *file_name, size_t *len) {
+  struct stat sb;
+  char *buf = NULL;
 
-  if (f) {
-    fseek(f, 0, SEEK_END);
-    length = ftell(f);
-    fseek(f, 0, SEEK_SET);
-    buffer = (char *)malloc(length + 1);
-    if (buffer) {
-      fread(buffer, 1, length, f);
-    }
-    *(buffer + length) = '\0';
-    fclose(f);
+  int fd = open(file_name, O_RDONLY);
+  if (-1 == fd) {
+    perror("open");
+    return NULL;
   }
 
-  return buffer;
+  if (-1 == fstat(fd, &sb)) {
+    perror("fstat");
+    return NULL;
+  }
+
+  buf = mmap(NULL, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+  *len = sb.st_size;
+
+  return buf;
 }
 
 unsigned int compile_shader(unsigned int type, const char *const source) {
@@ -48,8 +55,12 @@ unsigned int compile_shader(unsigned int type, const char *const source) {
 unsigned int create_shader_program(char *vert, char *frag) {
   GLCall(unsigned int program = glCreateProgram());
 
-  char *vert_source = load_shader_source(vert);
-  char *frag_source = load_shader_source(frag);
+  size_t vert_len, frag_len;
+  char *vert_source = load_shader_source(vert, &vert_len);
+  char *frag_source = load_shader_source(frag, &frag_len);
+  if (vert_source == NULL || frag_source == NULL) {
+    printf("shader source is NULL");
+  }
 
   unsigned int vs = compile_shader(GL_VERTEX_SHADER, vert_source);
   unsigned int fs = compile_shader(GL_FRAGMENT_SHADER, frag_source);
@@ -59,8 +70,8 @@ unsigned int create_shader_program(char *vert, char *frag) {
   GLCall(glLinkProgram(program));
   GLCall(glValidateProgram(program));
 
-  free(vert_source);
-  free(frag_source);
+  munmap(vert_source, vert_len);
+  munmap(frag_source, frag_len);
   GLCall(glDeleteShader(vs));
   GLCall(glDeleteShader(fs));
 
@@ -70,14 +81,18 @@ unsigned int create_shader_program(char *vert, char *frag) {
 unsigned int create_compute_shader_program(char *file_path) {
   GLCall(unsigned int program = glCreateProgram());
 
-  char *source = load_shader_source(file_path);
+  size_t source_len;
+  char *source = load_shader_source(file_path, &source_len);
+  if (NULL == source)
+    printf("shader source is NULL");
+
   unsigned int cs = compile_shader(GL_COMPUTE_SHADER, source);
 
   GLCall(glAttachShader(program, cs));
   GLCall(glLinkProgram(program));
   GLCall(glValidateProgram(program));
 
-  free(source);
+  munmap(source, source_len);
   GLCall(glDeleteShader(cs));
 
   return program;

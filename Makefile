@@ -8,7 +8,7 @@ IMGUI_LIB_DIR := dependencies/imgui/lib
 
 SRCS := $(shell find $(SRC_DIR) -name '*.c')
 OBJS := $(SRCS:%.c=%.o)
-EXECUTABLE = $(BUILD_DIR)/miso
+EXECUTABLE = $(BUILD_DIR)/out
 
 .PHONY: all clean
 
@@ -21,14 +21,14 @@ $(OBJS): %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $(addprefix $(BUILD_DIR)/,$(notdir $@)) -Idependencies/imgui/include
 
 run:
-	./build/miso
+	./build/out
 
 debug:
-	gdb ./build/miso
+	gdb ./build/out
 
 leak-check:
 	#valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --log-file=leak.txt ./build/app
-	valgrind --leak-check=full --log-file=leak.txt ./build/miso
+	valgrind --leak-check=full --log-file=leak.txt ./build/out
 
 clean:
 	rm -rf $(BUILD_DIR)/*
