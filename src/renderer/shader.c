@@ -26,6 +26,8 @@ char *load_shader_source(char *file_name, size_t *len) {
   buf = mmap(NULL, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
   *len = sb.st_size;
 
+  close(fd);
+
   return buf;
 }
 

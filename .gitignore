@@ -1,4 +1,5 @@
 app
-*.o
-build/
+build/*.o
+build/out
 leak.txt
+
