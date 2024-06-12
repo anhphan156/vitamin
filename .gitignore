@@ -1,5 +1,6 @@
 app
 build/*.o
 build/out
+out
 leak.txt
 
