@@ -6,6 +6,7 @@
 #include "renderer/shader.h"
 #include "renderer/stdinc.h"
 #include "renderer/window.h"
+#include "voxel/chunk.h"
 
 struct ImGuiContext *ctx;
 struct ImGuiIO *io;
@@ -126,6 +127,9 @@ int main() {
   ClearMesh(mesh);
   glDeleteBuffers(1, &positionBuffer);
   glfwTerminate();
+
+  Chunk *c = CreateChunk();
+  DestroyChunk(c);
 
   return 0;
 }
