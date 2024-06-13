@@ -34,8 +34,10 @@ struct Mesh *CreateMesh(float *positions, unsigned int position_count,
   GLCall(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
                                (const void *)(6 * sizeof(float))));
 
-  char vert[61] = "/home/backspace/data/dev/miso/resources/shaders/color.vert";
-  char frag[61] = "/home/backspace/data/dev/miso/resources/shaders/color.frag";
+  char vert[64] =
+      "/home/backspace/data/dev/vitamin/resources/shaders/color.vert";
+  char frag[64] =
+      "/home/backspace/data/dev/vitamin/resources/shaders/color.frag";
   m->shader_program = create_shader_program(vert, frag);
 
   GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));

@@ -12,9 +12,10 @@ out vec3 i_lightPos;
 uniform mat4 u_mvp;
 uniform mat4 u_vp;
 
-uniform float u_baseScale;
+uniform float u_scale;
 uniform float u_time;
 uniform float u_resolution;
+uniform float u_range;
 uniform vec3 u_lightPos;
 
 layout(binding = 2, std430) buffer ssbo1 {
@@ -24,7 +25,7 @@ layout(binding = 2, std430) buffer ssbo1 {
 void main(){
 	i_uv = texCoord;
 
-	float s = u_baseScale * 0.5 / u_resolution;
+	float s = u_scale;
 	mat4 scale = mat4(
 		s, 0.0, 0.0, 0.0,
 		0.0, s, 0.0, 0.0,
@@ -32,8 +33,8 @@ void main(){
 		0.0, 0.0, 0.0, 1.0
 	);
 
-	float c = cos(u_time * .5);
-	s = sin(u_time * .5);
+	float c = cos(0.0);
+	s = sin(0.0);
 	mat4 rot = mat4(
 		c, 0.0, s, 0.0,
 		0.0, 1.0, 0.0, 0.0,

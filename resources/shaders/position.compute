@@ -12,15 +12,23 @@ uniform int _Resolution;
 uniform float _Freq;
 uniform float _Amp;
 uniform float _Shape;
+uniform float _Range;
+uniform float _Scale;
+uniform float _Rot;
+uniform sampler2D _Tex;
 
 void main(){
-	vec2 uv = (gl_GlobalInvocationID.xy + 0.5) * _Step - 1.0; 
+	vec2 uv = (gl_GlobalInvocationID.xy + 0.5) * _Step - _Range; 
 
-	vec4 p1 = vec4(uv.x, sin(length(uv) * _Freq - _t) * _Amp, uv.y, 1.0);
-	float r = sin(_Freq / 10. * 1.57 * uv.y + uv.x - _t);
-	vec4 p2 = vec4(r*cos(uv.x * 3.14), sin(uv.y * 1.57) * _Amp, r*sin(uv.x * 3.14), 1.0);
+	vec2 noise_uv = (gl_GlobalInvocationID.xy + 0.5) * (1.0 / _Resolution); 
+	vec3 noise = texture(_Tex, noise_uv).xyz;
 
-	vec4 p = mix(p1, p2, _Shape);
+	float c = cos(_Rot);
+	float s = sin(_Rot);
+	float x = uv.x * c - uv.y * s;
+	float y = uv.x * s + uv.y * c;
+	vec4 p = vec4(x, noise.x, y, 1.0);
+	p.y = floor(p.y * 25.0) * _Scale;
 
 	if(gl_GlobalInvocationID.x < _Resolution && gl_GlobalInvocationID.y < _Resolution){
 		_Position[gl_GlobalInvocationID.x + gl_GlobalInvocationID.y * _Resolution] = p;

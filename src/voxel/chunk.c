@@ -16,7 +16,8 @@ Chunk *CreateChunk() {
       Block *row = (Block *)malloc(sizeof(Block) * CHUNKSIZE);
       *(plane + row_id) = row;
       for (int block_id = 0; block_id < CHUNKSIZE; block_id += 1) {
-        (row + block_id)->isActive = 1;
+        (row + block_id)->isActive = 0;
+        (row + block_id)->type = BL_DEFAULT;
       }
     }
   }

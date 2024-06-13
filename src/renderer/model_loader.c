@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void load_model(const char *model_path, float **positions,
+void load_model(const char *model_path, float **vertices,
                 unsigned int *positions_count, unsigned int **indices,
                 unsigned int *indices_count) {
 
@@ -13,7 +13,7 @@ void load_model(const char *model_path, float **positions,
       model_path, aiProcess_CalcTangentSpace | aiProcess_Triangulate);
   if (NULL == scene) {
     printf("%s\n", aiGetErrorString());
-    *positions = NULL;
+    *vertices = NULL;
     *indices = NULL;
     *positions_count = 0;
     *indices_count = 0;
@@ -21,7 +21,7 @@ void load_model(const char *model_path, float **positions,
   }
 
   *positions_count = 8 * scene->mMeshes[0]->mNumVertices;
-  *positions = (float *)malloc(sizeof(float) * *positions_count);
+  *vertices = (float *)malloc(sizeof(float) * *positions_count);
 
   int i;
   for (i = 0; i < scene->mMeshes[0]->mNumVertices; i++) {
@@ -38,18 +38,18 @@ void load_model(const char *model_path, float **positions,
       uv_x = scene->mMeshes[0]->mTextureCoords[0][i].x;
       uv_y = scene->mMeshes[0]->mTextureCoords[0][i].y;
     } else {
-      uv_x = 0.0f;
+      uv_x = 1.0f;
       uv_y = 0.0f;
     }
 
-    (*positions)[i * 8 + 0] = pos_x;
-    (*positions)[i * 8 + 1] = pos_y;
-    (*positions)[i * 8 + 2] = pos_z;
-    (*positions)[i * 8 + 3] = normal_x;
-    (*positions)[i * 8 + 4] = normal_y;
-    (*positions)[i * 8 + 5] = normal_z;
-    (*positions)[i * 8 + 6] = uv_x;
-    (*positions)[i * 8 + 7] = uv_y;
+    (*vertices)[i * 8 + 0] = pos_x;
+    (*vertices)[i * 8 + 1] = pos_y;
+    (*vertices)[i * 8 + 2] = pos_z;
+    (*vertices)[i * 8 + 3] = normal_x;
+    (*vertices)[i * 8 + 4] = normal_y;
+    (*vertices)[i * 8 + 5] = normal_z;
+    (*vertices)[i * 8 + 6] = uv_x;
+    (*vertices)[i * 8 + 7] = uv_y;
   }
 
   *indices_count = scene->mMeshes[0]->mNumFaces * 3;
